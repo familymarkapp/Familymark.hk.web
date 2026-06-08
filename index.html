@@ -153,6 +153,14 @@ body{font-family:'Noto Sans HK',sans-serif;background:var(--bg);color:var(--ink)
 <!-- SHOPPING -->
 <div id="tab-shopping" class="tab">
   <div class="sec" style="padding-bottom:100px">
+    <div id="restockSection" class="hidden" style="margin-bottom:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
+        <div class="sec-t" style="margin:0">⚠️ 需補貨</div>
+        <button onclick="addAllRestock()" style="background:var(--gl);color:var(--gld);border:none;border-radius:8px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:inherit;font-weight:600">全部加入購物</button>
+      </div>
+      <div id="restockList"></div>
+    </div>
+    <div class="sec-t">購物清單</div>
     <div style="display:flex;gap:7px;margin-bottom:11px">
       <input type="text" id="shopInput" placeholder="新增購物項目..." style="flex:1;border:.5px solid var(--div);border-radius:10px;padding:9px 12px;font-size:14px;font-family:inherit;background:var(--sur);color:var(--ink);outline:none">
       <button onclick="addShop()" style="background:var(--gld);color:#fff;border:none;border-radius:10px;padding:9px 16px;font-size:18px;cursor:pointer">+</button>
@@ -506,6 +514,7 @@ function saveItem() {
   saveItems();
   closeM('itemModal');
   renderAll();
+  autoAddIfNeeded(item);
 }
 function promptWaste() {
   if (!editId) return;
@@ -573,6 +582,17 @@ function openDetail(id) {
   openM('detailModal');
 }
 
+function autoAddIfNeeded(item) {
+  if (item.qty <= (item.min||1)) {
+    var already = shops.some(function(s){ return s.name === item.name && !s.done; });
+    if (!already) {
+      shops.push({name:item.name, done:false});
+      saveShops();
+      renderRestock();
+    }
+  }
+}
+
 function adjQty(id, delta) {
   var item = items.find(function(i){ return i.id === id; });
   if (!item) return;
@@ -580,9 +600,49 @@ function adjQty(id, delta) {
   var el = document.getElementById('qn-'+id);
   if (el) el.textContent = item.qty;
   saveItems(); renderAll();
+  autoAddIfNeeded(item);
 }
 
 // ─── Shopping ─────────────────────────────────────────
+function renderRestock() {
+  var needRestock = items.filter(function(i){ return i.qty <= (i.min||1); });
+  var sec = document.getElementById('restockSection');
+  var el  = document.getElementById('restockList');
+  if (!needRestock.length) { sec.classList.add('hidden'); return; }
+  sec.classList.remove('hidden');
+  el.innerHTML = '';
+  for (var i = 0; i < needRestock.length; i++) {
+    (function(item) {
+      var row = document.createElement('div');
+      row.style.cssText = 'background:var(--sur);border-radius:12px;border:.5px solid var(--div);padding:10px 13px;display:flex;align-items:center;gap:10px;margin-bottom:5px';
+      var info = document.createElement('div');
+      info.style.flex = '1';
+      info.innerHTML = '<div style="font-size:13px;font-weight:600">'+(EMO[item.cat]||'📦')+' '+escHtml(item.name)+'</div>'+
+        '<div style="font-size:10px;color:var(--k3);margin-top:2px">剩 '+item.qty+' '+item.unit+' · 最低 '+item.min+'</div>';
+      var btn = document.createElement('button');
+      btn.style.cssText = 'background:var(--gl);color:var(--gld);border:none;border-radius:8px;padding:5px 10px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:600;white-space:nowrap';
+      btn.textContent = '+ 加入';
+      btn.addEventListener('click', function() {
+        var already = shops.some(function(s){ return s.name === item.name && !s.done; });
+        if (!already) { shops.push({name:item.name, done:false}); saveShops(); renderShops(); }
+        btn.textContent = '✓ 已加';
+        btn.disabled = true;
+      });
+      row.appendChild(info); row.appendChild(btn);
+      el.appendChild(row);
+    })(needRestock[i]);
+  }
+}
+function addAllRestock() {
+  var needRestock = items.filter(function(i){ return i.qty <= (i.min||1); });
+  for (var i = 0; i < needRestock.length; i++) {
+    var name = needRestock[i].name;
+    var already = shops.some(function(s){ return s.name === name && !s.done; });
+    if (!already) shops.push({name:name, done:false});
+  }
+  saveShops(); renderShops(); renderRestock();
+}
+
 function renderShops() {
   var el = document.getElementById('shopList');
   if (!shops.length) {
@@ -989,7 +1049,7 @@ function go(tab, btn) {
   if (tab === 'tips')      renderTips();
   if (tab === 'locations') renderLocations();
   if (tab === 'waste')     renderWaste();
-  if (tab === 'shopping')  renderShops();
+  if (tab === 'shopping')  { renderShops(); renderRestock(); }
 }
 function openM(id) { document.getElementById(id).classList.remove('hidden'); }
 function closeM(id) { document.getElementById(id).classList.add('hidden'); }
@@ -1002,6 +1062,7 @@ loadAll();
 renderChips();
 renderAll();
 renderShops();
+renderRestock();
 renderTips();
 renderLocations();
 renderWaste();
