@@ -255,7 +255,7 @@ body{font-family:'Noto Sans HK',sans-serif;background:var(--bg);color:var(--ink)
       <a href="https://www.parknshop.com" target="_blank" style="background:var(--sur);border:.5px solid var(--div);border-radius:10px;padding:12px;text-align:center;text-decoration:none;color:var(--ink);font-size:13px;font-weight:600">🛒 百佳</a>
       <a href="https://www.wellcome.com.hk" target="_blank" style="background:var(--sur);border:.5px solid var(--div);border-radius:10px;padding:12px;text-align:center;text-decoration:none;color:var(--ink);font-size:13px;font-weight:600">🛒 惠康</a>
       <a href="https://hk.yhdaa.vip" target="_blank" style="background:var(--sur);border:.5px solid var(--div);border-radius:10px;padding:12px;text-align:center;text-decoration:none;color:var(--ink);font-size:13px;font-weight:600">🛒 日本城</a>
-      <a href="https://www.consumer.org.hk/price-watch" target="_blank" style="background:var(--gl);border:.5px solid var(--gold);border-radius:10px;padding:12px;text-align:center;text-decoration:none;color:var(--gold);font-size:13px;font-weight:700">📊 消委會</a>
+      <a href="https://www.consumer.org.hk/tc/price-watch" target="_blank" style="background:var(--gl);border:.5px solid var(--gold);border-radius:10px;padding:12px;text-align:center;text-decoration:none;color:var(--gold);font-size:13px;font-weight:700">📊 消委會</a>
     </div>
     <div class="disc">價格資料來自第三方，僅供參考，購買前請自行核實。</div>
   </div>
@@ -270,13 +270,14 @@ body{font-family:'Noto Sans HK',sans-serif;background:var(--bg);color:var(--ink)
   </div>
 </div>
 
-<!-- TYPHOON TAB -->
-<div id="tab-typhoon" class="tab">
-  <div class="tyh"><h2>🌀 颱風備災清單</h2><p>提早準備，保障家人安全</p></div>
-  <div class="prog"><div class="pf" id="tyProg"></div></div>
+<!-- LOCATIONS TAB -->
+<div id="tab-locations" class="tab">
   <div class="sec" style="padding-bottom:100px">
-    <div id="tyList"></div>
-    <div class="disc">⚠️ 僅供參考，請依從香港政府及官方機構指示。資料參考民眾安全服務隊及紅十字會建議。</div>
+    <div id="locationsList"></div>
+    <div class="empty hidden" id="locEmpty" style="padding:50px 20px">
+      <div class="em">🗺️</div>
+      <p>未有存貨<br><small>新增存貨時填寫位置，就會在這裏顯示</small></p>
+    </div>
   </div>
 </div>
 
@@ -287,7 +288,7 @@ body{font-family:'Noto Sans HK',sans-serif;background:var(--bg);color:var(--ink)
   <button class="nb" onclick="go('tips',this)"><span class="ni">💡</span>保存期</button>
   <button class="nb" onclick="go('price',this)"><span class="ni">🔍</span>格價</button>
   <button class="nb" onclick="go('waste',this)"><span class="ni">♻️</span>浪費</button>
-  <button class="nb" onclick="go('typhoon',this)"><span class="ni">🌀</span>備災</button>
+  <button class="nb" onclick="go('locations',this)"><span class="ni">🗺️</span>位置</button>
 </div>
 <button class="fab" id="fab" onclick="openAdd()">+</button>
 
@@ -333,8 +334,8 @@ body{font-family:'Noto Sans HK',sans-serif;background:var(--bg);color:var(--ink)
     <div class="mhd"><span class="mt">記錄浪費</span><button class="mc" onclick="closeM('wasteModal')">✕</button></div>
     <div class="form">
       <div style="font-size:14px;color:var(--k2)" id="wasteItemName"></div>
-      <div class="fl"><label>丟棄數量</label><input type="number" id="wQty" value="1" min="0.1" step="0.1"></div>
-      <div class="fl"><label>估計金額 (HK$)</label><input type="number" id="wCost" placeholder="0.00" step="0.1" min="0"></div>
+      <div class="fl"><label>丟棄數量</label><input type="number" id="wQty" value="1" min="0.1" step="0.1" oninput="updateWasteCost()"></div>
+      <div class="fl"><label>估計金額 (HK$)</label><input type="number" id="wCost" placeholder="0.00" step="0.1" min="0"><div id="wCostHint" style="font-size:11px;color:var(--gold);margin-top:4px;display:none"></div></div>
       <div class="fl"><label>原因</label>
         <select id="wReason"><option value="過期">過期</option><option value="變壞">變壞</option><option value="唔食得">唔食得</option><option value="其他">其他</option></select>
       </div>
@@ -652,7 +653,8 @@ function toShop(name){shops.push({name,done:false});saveShops();closeM('detailMo
 function doPrice(){
   const q=document.getElementById('priceQ').value.trim();
   if(!q)return;
-  window.open(`https://www.consumer.org.hk/price-watch/search?q=${encodeURIComponent(q)}`,'_blank');
+  // Try multiple search approaches
+  window.open(`https://www.consumer.org.hk/tc/price-watch?keyword=${encodeURIComponent(q)}`,'_blank');
 }
 
 // ── Waste ──
@@ -661,9 +663,24 @@ function openWasteModal(id){
   wasteItemId=id;
   document.getElementById('wasteItemName').textContent=`🗑️ 丟棄「${item.name}」`;
   document.getElementById('wQty').value=item.qty;
-  document.getElementById('wCost').value=item.price?((item.price*item.qty).toFixed(1)):'';
+  const autoCost = item.price ? (item.price * item.qty).toFixed(1) : '';
+  document.getElementById('wCost').value=autoCost;
+  if(item.price){
+    document.getElementById('wCostHint').textContent=`參考價 HK$${item.price} × ${item.qty}${item.unit||'件'} = HK$${autoCost}`;
+    document.getElementById('wCostHint').style.display='block';
+  } else {
+    document.getElementById('wCostHint').style.display='none';
+  }
   document.getElementById('wReason').value='過期';
   openM('wasteModal');
+}
+function updateWasteCost(){
+  const item=items.find(i=>i.id===wasteItemId);
+  if(!item||!item.price)return;
+  const qty=parseFloat(document.getElementById('wQty').value)||0;
+  const cost=(item.price*qty).toFixed(1);
+  document.getElementById('wCost').value=cost;
+  document.getElementById('wCostHint').textContent=`參考價 HK$${item.price} × ${qty}${item.unit||'件'} = HK$${cost}`;
 }
 function saveWaste(){
   const item=items.find(i=>i.id===wasteItemId);if(!item)return;
@@ -734,7 +751,48 @@ function renderTips(){
     <div class="ts" style="margin-top:4px;color:var(--gold)">💡 ${t.t}</div></div>`).join('');
 }
 
-// ── Typhoon ──
+// ── Locations ──
+function renderLocations(){
+  const el=document.getElementById('locationsList');
+  const empEl=document.getElementById('locEmpty');
+  if(!items.length){el.innerHTML='';empEl.classList.remove('hidden');return;}
+  empEl.classList.add('hidden');
+
+  // Group by location
+  const byLoc={};
+  items.forEach(item=>{
+    const loc=item.loc||'未設定位置';
+    if(!byLoc[loc])byLoc[loc]=[];
+    byLoc[loc].push(item);
+  });
+
+  // Sort locations
+  const sorted=Object.entries(byLoc).sort((a,b)=>b[1].length-a[1].length);
+
+  el.innerHTML=sorted.map(([loc,locItems])=>`
+    <div style="margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px">
+        <span style="font-size:16px">📍</span>
+        <span style="font-size:13px;font-weight:700;color:var(--k2);letter-spacing:.5px;text-transform:uppercase">${loc}</span>
+        <span style="font-size:11px;color:var(--k3);margin-left:auto">${locItems.length} 件</span>
+      </div>
+      ${locItems.sort((a,b)=>{
+        if(a.exp&&b.exp)return new Date(a.exp)-new Date(b.exp);
+        if(a.exp)return-1;if(b.exp)return 1;return 0;
+      }).map(item=>{
+        const ei=expiryInfo(item.exp);
+        return`<div class="icard" onclick="openDetail('${item.id}')" style="margin-bottom:5px">
+          <div class="irow">
+            <div class="lbar" style="background:${barClr(item)}"></div>
+            <div class="iemo">${EMO[item.cat]||'📦'}</div>
+            <div class="iinfo"><div class="iname">${item.name}</div><div class="imeta">${item.cat}</div></div>
+            <div class="irt"><div class="qb">${item.qty} ${item.unit||'件'}</div><div class="eb ${ei.cls}">${ei.label}</div></div>
+          </div></div>`;
+      }).join('')}
+    </div>`).join('');
+}
+
+// ── Typhoon (kept for reference, tab replaced by locations) ──
 const TY=[
   {id:'w1',cat:'食水',n:'樽裝水（每人每日 3 公升，備 3 日）'},
   {id:'w2',cat:'食水',n:'消毒藥水（備用淨水）'},
@@ -764,7 +822,7 @@ function renderTy(){
     </div>`).join('')}
     <div style="margin-bottom:10px"></div>`).join('');
 }
-function togTy(id){tyChecked.has(id)?tyChecked.delete(id):tyChecked.add(id);saveTy();renderTy();}
+function togTy(id){tyChecked.has(id)?tyChecked.delete(id):tyChecked.add(id);saveTy();// renderTy(); // typhoon tab replaced by locations}
 
 // ── Export / Import ──
 function exportData(){
@@ -785,7 +843,7 @@ function importData(e){
       tyChecked=new Set(data.tyChecked||[]);
       save();saveShops();saveWastes();saveTy();
       if(data.family){LS.set('fm_family',data.family);document.getElementById('fFamily').value=data.family;saveFamily();}
-      renderAll();renderShops();renderTips();renderTy();renderWaste();
+      renderAll();renderShops();renderTips();// renderTy(); // typhoon tab replaced by locationsrenderWaste();
       alert('匯入成功！');
     }catch{alert('檔案格式有誤');}
   };
@@ -799,6 +857,10 @@ function go(tab,btn){
   document.getElementById('tab-'+tab).classList.add('on');
   btn.classList.add('on');
   document.getElementById('fab').style.display=tab==='inventory'?'flex':'none';
+  if(tab==='inventory'){renderAll();}
+  if(tab==='tips'){renderTips();}
+  if(tab==='waste'){renderWaste();}
+  if(tab==='locations'){renderLocations();}
 }
 function openM(id){document.getElementById(id).classList.remove('hidden')}
 function closeM(id){document.getElementById(id).classList.add('hidden')}
@@ -998,7 +1060,7 @@ async function shareTicket(){
 }
 
 // ── Init ──
-loadAll();renderChips();renderAll();renderShops();renderTips();renderTy();renderWaste();
+loadAll();renderChips();renderAll();renderShops();renderTips();// renderTy(); // typhoon tab replaced by locationsrenderWaste();
 checkNotifBanner();updateNotifStatus();
 scheduleNotifs();
 </script>
