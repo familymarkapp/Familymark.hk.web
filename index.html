@@ -130,7 +130,7 @@ body{font-family:'Noto Sans HK',sans-serif;background:var(--bg);color:var(--ink)
   <div class="hdr-row">
     <div>
       <h1>FamilyMark<span class="hk-badge">hk</span></h1>
-      <div class="hdr-sub" id="subLine">FAMILYMARK.HK</div>
+      <div class="hdr-sub" id="subLine">FAMILYMARK.HK &nbsp;·&nbsp; <span style="background:rgba(201,148,58,.25);color:var(--gld);padding:1px 6px;border-radius:4px;font-size:8px">BETA</span></div>
     </div>
     <div class="hdr-btns">
       <button class="ibtn" id="darkBtn" onclick="toggleDark()">🌙</button>
@@ -179,28 +179,6 @@ body{font-family:'Noto Sans HK',sans-serif;background:var(--bg);color:var(--ink)
   </div>
 </div>
 
-<!-- PRICE -->
-<div id="tab-price" class="tab">
-  <div class="sec" style="padding-bottom:100px">
-    <div style="background:var(--sur);border-radius:12px;border:.5px solid var(--div);padding:14px;margin-bottom:12px">
-      <div style="font-size:14px;font-weight:700;margin-bottom:10px">🔍 消委會格價</div>
-      <div style="display:flex;gap:8px;margin-bottom:10px">
-        <input type="text" id="priceQ" placeholder="搜尋產品名稱..." style="flex:1;border:.5px solid var(--div);border-radius:10px;padding:9px 12px;font-size:14px;font-family:inherit;background:var(--bg);color:var(--ink);outline:none">
-        <button onclick="doPrice()" style="background:var(--gld);color:#fff;border:none;border-radius:10px;padding:9px 16px;font-size:14px;cursor:pointer;font-family:inherit;white-space:nowrap">格價</button>
-      </div>
-      <div style="font-size:12px;color:var(--k3)">會跳轉至消委會網站顯示各超市實際售價</div>
-    </div>
-    <div class="sec-t">常用超市連結</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:14px">
-      <a href="https://www.parknshop.com" target="_blank" style="background:var(--sur);border:.5px solid var(--div);border-radius:10px;padding:12px;text-align:center;text-decoration:none;color:var(--ink);font-size:13px;font-weight:600;display:block">🛒 百佳</a>
-      <a href="https://www.wellcome.com.hk" target="_blank" style="background:var(--sur);border:.5px solid var(--div);border-radius:10px;padding:12px;text-align:center;text-decoration:none;color:var(--ink);font-size:13px;font-weight:600;display:block">🛒 惠康</a>
-      <a href="https://www.aeon.com.hk" target="_blank" style="background:var(--sur);border:.5px solid var(--div);border-radius:10px;padding:12px;text-align:center;text-decoration:none;color:var(--ink);font-size:13px;font-weight:600;display:block">🛒 AEON</a>
-      <a href="https://www.consumer.org.hk/tc/price-watch" target="_blank" style="background:var(--gl);border:.5px solid var(--gld);border-radius:10px;padding:12px;text-align:center;text-decoration:none;color:var(--gld);font-size:13px;font-weight:700;display:block">📊 消委會</a>
-    </div>
-    <div class="disc">價格資料來自第三方，僅供參考，購買前請自行核實。</div>
-  </div>
-</div>
-
 <!-- LOCATIONS -->
 <div id="tab-locations" class="tab">
   <div class="sec" style="padding-bottom:100px">
@@ -222,7 +200,7 @@ body{font-family:'Noto Sans HK',sans-serif;background:var(--bg);color:var(--ink)
   <button class="nb on" onclick="go('inventory',this)"><span class="ni">📦</span>存貨</button>
   <button class="nb" onclick="go('shopping',this)"><span class="ni">🛒</span>購物</button>
   <button class="nb" onclick="go('tips',this)"><span class="ni">💡</span>保存期</button>
-  <button class="nb" onclick="go('price',this)"><span class="ni">🔍</span>格價</button>
+  
   <button class="nb" onclick="go('locations',this)"><span class="ni">🗺️</span>位置</button>
   <button class="nb" onclick="go('waste',this)"><span class="ni">♻️</span>浪費</button>
 </div>
@@ -721,12 +699,7 @@ function renderTips() {
 }
 
 // ─── Price ────────────────────────────────────────────
-function doPrice() {
-  var q = document.getElementById('priceQ').value.trim();
-  if (!q) return;
-  window.open('https://www.consumer.org.hk/tc/price-watch', '_blank');
-}
-document.getElementById('priceQ').addEventListener('keydown', function(e){ if(e.key==='Enter') doPrice(); });
+
 
 // ─── Locations ────────────────────────────────────────
 function renderLocations() {
@@ -865,9 +838,10 @@ function generateTicket() {
   ctx.fillStyle = CREAM;
   ctx.font = 'bold 34px Noto Sans HK, sans-serif';
   ctx.fillText('FAMILY MARK', 40, 52);
+  var markWidth = ctx.measureText('FAMILY MARK').width;
   ctx.fillStyle = GOLD;
-  ctx.font = '17px Noto Sans HK, sans-serif';
-  ctx.fillText('hk', ctx.measureText('FAMILY MARK').width + 44, 52);
+  ctx.font = 'bold 16px Noto Sans HK, sans-serif';
+  ctx.fillText('hk', 40 + markWidth + 6, 44);
   ctx.fillStyle = INK3;
   ctx.font = '12px Noto Sans HK, sans-serif';
   ctx.fillText('HOME INVENTORY · 存貨一覽', 40, 76);
@@ -1059,6 +1033,10 @@ document.querySelectorAll('.ov').forEach(function(ov) {
 
 // ─── Init ─────────────────────────────────────────────
 loadAll();
+if (localStorage.getItem('fm_guide') === '1') {
+  var g = document.getElementById('iosGuide');
+  if (g) g.style.display = 'none';
+}
 renderChips();
 renderAll();
 renderShops();
