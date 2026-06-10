@@ -277,6 +277,56 @@ body{font-family:'Noto Sans HK',sans-serif;background:var(--bg);color:var(--ink)
   </div>
 </div>
 
+<!-- Install Guide Modal -->
+<div class="ov hidden" id="installGuideModal">
+  <div class="modal">
+    <div class="mh"></div>
+    <div class="mhd"><span class="mt">📱 加至主畫面</span><button class="mc" onclick="closeM('installGuideModal')">✕</button></div>
+    <div class="form">
+      <div style="font-size:13px;color:var(--k2);line-height:1.6;margin-bottom:4px">
+        將 FamilyMark 加至主畫面，可以像原生 App 一樣全螢幕使用，而且資料會儲存喺本機。
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="background:var(--bg);border-radius:10px;padding:12px;display:flex;gap:12px;align-items:flex-start">
+          <div style="background:var(--gld);color:white;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0">1</div>
+          <div>
+            <div style="font-size:13px;font-weight:600;margin-bottom:3px">用 Safari 開啟</div>
+            <div style="font-size:12px;color:var(--k3)">必須係 Safari，Chrome 唔支援</div>
+          </div>
+        </div>
+
+        <div style="background:var(--bg);border-radius:10px;padding:12px;display:flex;gap:12px;align-items:flex-start">
+          <div style="background:var(--gld);color:white;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0">2</div>
+          <div>
+            <div style="font-size:13px;font-weight:600;margin-bottom:3px">點 底部 <span style="font-size:16px">⎙</span> 分享按鈕</div>
+            <div style="font-size:12px;color:var(--k3)">iPhone：底部中間<br>iPad：右上角</div>
+          </div>
+        </div>
+
+        <div style="background:var(--bg);border-radius:10px;padding:12px;display:flex;gap:12px;align-items:flex-start">
+          <div style="background:var(--gld);color:white;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0">3</div>
+          <div>
+            <div style="font-size:13px;font-weight:600;margin-bottom:3px">選「加入主畫面」</div>
+            <div style="font-size:12px;color:var(--k3)">Add to Home Screen</div>
+          </div>
+        </div>
+
+        <div style="background:var(--bg);border-radius:10px;padding:12px;display:flex;gap:12px;align-items:flex-start">
+          <div style="background:var(--grn);color:white;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0">✓</div>
+          <div>
+            <div style="font-size:13px;font-weight:600;margin-bottom:3px">完成！</div>
+            <div style="font-size:12px;color:var(--k3)">主畫面會出現 FamilyMark 圖示，全螢幕打開</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-box">⚠️ 資料儲存喺本機，清除 Safari 快取會刪除資料。正式 App 版本將支援雲端備份。</div>
+      <button class="btn-p" onclick="closeM('installGuideModal')">明白了</button>
+    </div>
+  </div>
+</div>
+
 <!-- Settings Modal -->
 <div class="ov hidden" id="settingsModal">
   <div class="modal">
@@ -285,21 +335,32 @@ body{font-family:'Noto Sans HK',sans-serif;background:var(--bg);color:var(--ink)
     <div class="form">
       <div class="fl"><label>家庭名稱</label><input type="text" id="fFamily" placeholder="例：Wong's Family" oninput="saveFamily()"></div>
       <div class="divider"></div>
+      <button class="btn-s" onclick="openM('installGuideModal')" style="display:flex;align-items:center;gap:8px;justify-content:center">
+        <span>📱</span> 如何加至主畫面
+      </button>
+      <div class="divider"></div>
       <div class="sec-t">通知</div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
         <div><div style="font-size:13px;font-weight:500">到期提醒</div><div style="font-size:11px;color:var(--k3)">啟動時檢查快到期存貨</div></div>
         <span id="notifStatus" style="font-size:12px;color:var(--k3)">未開啟</span>
       </div>
       <button class="btn-s" onclick="reqNotif()">開啟通知權限</button>
+
       <div class="divider"></div>
-      <div class="sec-t">資料管理</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        <button class="btn-s" onclick="exportData()">📤 匯出 JSON</button>
-        <label class="btn-s" style="text-align:center;cursor:pointer">📥 匯入 JSON<input type="file" accept=".json" onchange="importData(event)" style="display:none"></label>
+      <div style="background:var(--hdr);border-radius:12px;padding:14px">
+        <div style="font-size:12px;font-weight:700;color:var(--gld);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">更多功能 — 正式 App</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="font-size:12px;color:rgba(240,235,224,.75);display:flex;align-items:center;gap:8px"><span>📷</span>條碼掃描 + 自動識別產品</div>
+          <div style="font-size:12px;color:rgba(240,235,224,.75);display:flex;align-items:center;gap:8px"><span>💬</span>家庭留言板 + 即時通知</div>
+          <div style="font-size:12px;color:rgba(240,235,224,.75);display:flex;align-items:center;gap:8px"><span>🗺️</span>家居平面圖存貨位置</div>
+          <div style="font-size:12px;color:rgba(240,235,224,.75);display:flex;align-items:center;gap:8px"><span>☁️</span>多裝置同步</div>
+          <div style="font-size:12px;color:rgba(240,235,224,.75);display:flex;align-items:center;gap:8px"><span>🖼️</span>保存期卡片生成器</div>
+        </div>
+        <div style="margin-top:12px;padding-top:10px;border-top:.5px solid rgba(255,255,255,.1);font-size:11px;color:var(--gld);text-align:center">
+          正式 App 即將推出 · 請 Follow @familymark.hk
+        </div>
       </div>
-      <div class="info-box" style="font-size:11px">資料儲存於本機裝置。清除瀏覽器資料前請先匯出備份。</div>
-      <div class="divider"></div>
-      <div style="text-align:center;font-size:12px;color:var(--k2)">FamilyMark.hk Web v1.0<br><span style="color:var(--gld)">@familymark.hk</span></div>
+      <div style="text-align:center;font-size:11px;color:var(--k3)">FamilyMark.hk Web Beta<br><span style="color:var(--gld)">@familymark.hk</span></div>
     </div>
   </div>
 </div>
@@ -1033,10 +1094,6 @@ document.querySelectorAll('.ov').forEach(function(ov) {
 
 // ─── Init ─────────────────────────────────────────────
 loadAll();
-if (localStorage.getItem('fm_guide') === '1') {
-  var g = document.getElementById('iosGuide');
-  if (g) g.style.display = 'none';
-}
 renderChips();
 renderAll();
 renderShops();
